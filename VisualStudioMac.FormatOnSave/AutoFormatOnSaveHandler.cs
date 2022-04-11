@@ -55,8 +55,15 @@ namespace MonoDevelop.AutoFormatOnSave
             return commands.FirstOrDefault(cmd => cmd.DisplayName == "Remove Unused and Sort (Usings)");
         }
 
+        private bool _skipDocumentSaved;
+
         private void DocumentsListener_DocumentSaved(object sender, EventArgs e)
         {
+            if (_skipDocumentSaved)
+            {
+                _skipDocumentSaved = false;
+                return;
+            }
             if (Settings.AutoFormatOnSave)
             {
                 var savedDocument = sender as Document;
@@ -81,7 +88,7 @@ namespace MonoDevelop.AutoFormatOnSave
                 {
                     IdeApp.CommandService.DispatchCommand(cmd.Id);
                 }
-
+                _skipDocumentSaved = true;
                 savedDocument.Save();
 
                 if (IdeApp.Workbench.ActiveDocument != activeDoc)
