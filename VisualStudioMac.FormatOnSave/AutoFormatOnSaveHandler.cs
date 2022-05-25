@@ -60,15 +60,13 @@ namespace MonoDevelop.AutoFormatOnSave
         private void DocumentsListener_DocumentSaved(object sender, EventArgs e)
         {
             if (_skipDocumentSaved)
-            {
-                _skipDocumentSaved = false;
                 return;
-            }
+
             if (Settings.AutoFormatOnSave)
             {
                 var savedDocument = sender as Document;
-                Runtime.RunInMainThread(
-                    () => IdeApp.Workbench.StatusBar.ShowMessage($"Formatting and fixing usings ({savedDocument.Name})..."));
+                //Runtime.RunInMainThread(
+                //    () => IdeApp.Workbench.StatusBar.ShowMessage($"Formatting and fixing usings ({savedDocument.Name})..."));
 
                 var activeDoc = IdeApp.Workbench.ActiveDocument;
 
@@ -88,14 +86,16 @@ namespace MonoDevelop.AutoFormatOnSave
                 {
                     IdeApp.CommandService.DispatchCommand(cmd.Id);
                 }
+
                 _skipDocumentSaved = true;
                 savedDocument.Save();
+                _skipDocumentSaved = false;
 
                 if (IdeApp.Workbench.ActiveDocument != activeDoc)
                 {
                     IdeApp.Workbench.OpenDocument(activeDoc.FilePath, project: null);
                 }
-                ResetStatusBar();
+                //ResetStatusBar();
             }
         }
 

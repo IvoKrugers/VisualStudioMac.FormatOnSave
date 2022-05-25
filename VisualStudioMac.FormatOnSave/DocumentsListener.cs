@@ -30,7 +30,7 @@ namespace MonoDevelop.AutoFormatOnSave
 
             IdeApp.Workbench.DocumentOpened += OnDocumentsChanged;
             IdeApp.Workbench.DocumentClosed += OnDocumentsChanged;
-            
+
             _currentDocuments = IdeApp.Workbench.Documents.ToArray();
             SubscribeDocumentsSaved();
         }

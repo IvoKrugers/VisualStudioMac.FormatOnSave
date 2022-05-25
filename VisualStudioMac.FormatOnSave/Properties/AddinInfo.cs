@@ -35,7 +35,7 @@ using VisualStudioMac.FormatOnSave;
     Category = "IDE extensions"
 )]
 
-[assembly: AddinName("Ivo: Format (⌘ + i) and Sort + Remove unused usings on save")]
+[assembly: AddinName("Format (⌘ + i) and Sort + Remove unused usings on Save")]
 [assembly: AddinDescription("This extension auto formats (⌘ + i) and Sort + Remove unused usings on save.\n\nby Ivo Krugers")]
 [assembly: AddinAuthor("Ivo Krugers")]
 [assembly: AddinUrl("https://github.com/IvoKrugers")]
