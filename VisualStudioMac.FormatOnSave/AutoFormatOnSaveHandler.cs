@@ -35,68 +35,88 @@ namespace MonoDevelop.AutoFormatOnSave
             _documentsListener.StopListening();
         }
 
+        private Command _formatCommand;
+
         private Command GetFormatCommand()
         {
-            var commands = IdeApp.CommandService.GetCommands();
-            //commands.ToList().ForEach(c =>
-            //{
-            //    if (!string.IsNullOrEmpty(c.DisplayName))
-            //    {
-            //        Debug.WriteLine($"{c.DisplayName} {c.AccelKey}-{c.AlternateAccelKeys}");
-            //    }
-            //});
-
-            return commands.FirstOrDefault(cmd => cmd.DisplayName == "Format Document");
+            if (_formatCommand is null)
+            {
+                var commands = IdeApp.CommandService.GetCommands();
+                //commands.ToList().ForEach(c =>
+                //{
+                //    if (!string.IsNullOrEmpty(c.DisplayName))
+                //    {
+                //        Debug.WriteLine($"{c.DisplayName} {c.AccelKey}-{c.AlternateAccelKeys}");
+                //    }
+                //});
+                _formatCommand = commands.FirstOrDefault(cmd => cmd.DisplayName == "Format Document");
+            }
+            return _formatCommand;
         }
+
+        private Command _removeUnusedAndSortCommand;
 
         private Command GetRemoveUnusedAndSortCommand()
         {
-            var commands = IdeApp.CommandService.GetCommands();
-            return commands.FirstOrDefault(cmd => cmd.DisplayName == "Remove Unused and Sort (Usings)");
+            if (_removeUnusedAndSortCommand is null)
+            {
+                var commands = IdeApp.CommandService.GetCommands();
+                _removeUnusedAndSortCommand = commands.FirstOrDefault(cmd => cmd.DisplayName == "Remove Unused and Sort (Usings)");
+            }
+            return _removeUnusedAndSortCommand;
+        }
+
+        private async void DocumentsListener_DocumentSaved(object sender, EventArgs e)
+        {
+            if (Settings.AutoFormatOnSave)
+            {
+                await FormatDocument(sender as Document);
+            }
         }
 
         private bool _skipDocumentSaved;
-
-        private void DocumentsListener_DocumentSaved(object sender, EventArgs e)
+        private async Task FormatDocument(Document document)
         {
+            if (document is null)
+                return;
+
             if (_skipDocumentSaved)
                 return;
 
-            if (Settings.AutoFormatOnSave)
+            await Runtime.RunInMainThread(() => IdeApp.Workbench.StatusBar.ShowMessage($"Formatting and fixing usings ({document.Name})..."));
+
+            var activeDoc = IdeApp.Workbench.ActiveDocument;
+
+            if (IdeApp.Workbench.ActiveDocument != document)
             {
-                var savedDocument = sender as Document;
-                //Runtime.RunInMainThread(
-                //    () => IdeApp.Workbench.StatusBar.ShowMessage($"Formatting and fixing usings ({savedDocument.Name})..."));
-
-                var activeDoc = IdeApp.Workbench.ActiveDocument;
-
-                if (IdeApp.Workbench.ActiveDocument != savedDocument)
-                {
-                    IdeApp.Workbench.OpenDocument(savedDocument.FilePath, project: null);
-                }
-
-                var cmd = GetFormatCommand();
-                if (cmd != null)
-                {
-                    IdeApp.CommandService.DispatchCommand(cmd.Id);
-                }
-
-                cmd = GetRemoveUnusedAndSortCommand();
-                if (cmd != null)
-                {
-                    IdeApp.CommandService.DispatchCommand(cmd.Id);
-                }
-
-                _skipDocumentSaved = true;
-                savedDocument.Save();
-                _skipDocumentSaved = false;
-
-                if (IdeApp.Workbench.ActiveDocument != activeDoc)
-                {
-                    IdeApp.Workbench.OpenDocument(activeDoc.FilePath, project: null);
-                }
-                //ResetStatusBar();
+                await IdeApp.Workbench.OpenDocument(document.FilePath, project: null);
             }
+
+            var cmd = GetFormatCommand();
+            if (cmd != null)
+            {
+                IdeApp.CommandService.DispatchCommand(cmd.Id);
+            }
+
+            cmd = GetRemoveUnusedAndSortCommand();
+            if (cmd != null)
+            {
+                IdeApp.CommandService.DispatchCommand(cmd.Id);
+            }
+
+            var bo = IdeApp.ProjectOperations.CurrentBuildOperation;
+            if (bo is null || bo.IsCompleted)
+            {
+                _skipDocumentSaved = true;
+                await document.Save();
+                _skipDocumentSaved = false;
+            }
+
+            if (IdeApp.Workbench.ActiveDocument != activeDoc)
+            {
+                await IdeApp.Workbench.OpenDocument(activeDoc.FilePath, project: null);
+            }
+            ResetStatusBar();
         }
 
         private CancellationTokenSource cts;
@@ -118,6 +138,5 @@ namespace MonoDevelop.AutoFormatOnSave
                 })
                 .WithCancellation(cts.Token);
         }
-
     }
 }
