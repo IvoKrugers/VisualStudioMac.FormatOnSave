@@ -11,8 +11,8 @@
 	</Extension>
 	<!-- Main Tool Menu Entries -->
 	<Extension path="/MonoDevelop/Ide/MainMenu/Tools">
-		<SeparatorItem id="EssentialsSeparator" />
-		<CommandItem id="MonoDevelop.AutoFormatOnSave.EnableAutoFormatOnSaveCommandHandler" />
-		<SeparatorItem id="EssentialsSeparator2" />
+		<SeparatorItem id="ExtensionSettingsSeparator" />
+		<CommandItem id="MonoDevelop.AutoFormatOnSave.EnableAutoFormatOnSaveCommandHandler" insertafter="ExtensionSettingsSeparator" />
+		<SeparatorItem id="ExtensionSettingsSeparator2" />
 	</Extension>
 </ExtensionModel>
