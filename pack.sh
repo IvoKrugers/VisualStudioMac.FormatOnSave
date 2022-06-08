@@ -12,3 +12,4 @@ pwd
 
 rm *.mpack
 mono /Applications/Visual\ Studio.app/Contents/Resources/lib/monodevelop/bin/vstool.exe setup pack ./VisualStudioMac.FormatOnSave/bin/VisualStudioMac.FormatOnSave.dll
+#/Applications/Visual\ Studio\ \(Preview\).app/Contents/MacOS/vstool setup pack "$PROJECTFOLDER/bin/VisualStudioMac.FormatOnSave.dll"
