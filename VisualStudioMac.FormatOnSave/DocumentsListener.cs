@@ -2,7 +2,6 @@
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
-using System;
 using System.Linq;
 namespace MonoDevelop.AutoFormatOnSave
 {
